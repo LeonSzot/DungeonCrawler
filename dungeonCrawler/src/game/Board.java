@@ -3,6 +3,7 @@ package game;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
+import java.util.Random;
 import javax.swing.*;
 
 public class Board extends JPanel implements ActionListener, KeyListener {
@@ -10,11 +11,9 @@ public class Board extends JPanel implements ActionListener, KeyListener {
     // controls the delay between each tick in ms
     private final int DELAY = 25;
     // controls the size of the board
-    public static final int TILE_SIZE = 50;
+    public static final int TILE_SIZE = 80;
     public static final int ROWS = 12;
     public static final int COLUMNS = 18;
-    // controls how many coins appear on the board
-    public static final int NUM_COINS = 5;
     // suppress serialization warning
     private static final long serialVersionUID = 490905409104883233L;
 
@@ -23,7 +22,8 @@ public class Board extends JPanel implements ActionListener, KeyListener {
     private Timer timer;
     // objects that appear on the game board
     private Player player;
-    private ArrayList coins;
+
+    public static Integer[][] board = getBoard();
 
     public Board() {
         // set the game board size
@@ -37,6 +37,24 @@ public class Board extends JPanel implements ActionListener, KeyListener {
         // this timer will call the actionPerformed() method every DELAY ms
         timer = new Timer(DELAY, this);
         timer.start();
+    }
+
+    private static Integer[][] getBoard(){
+        Integer[][] board = new Integer[ROWS][COLUMNS];
+        ArrayList <Integer> options = new ArrayList<>();
+        options.add(0);
+        options.add(1);
+        options.add(0);
+        options.add(0);
+        Random generator = new Random();
+
+        for (int i = 0; i < ROWS; i++){
+            for (int j = 0; j < COLUMNS; j++){
+                board[i][j] = options.get(generator.nextInt(3));
+            }
+        }
+
+        return board;
     }
 
     @Override
@@ -86,13 +104,11 @@ public class Board extends JPanel implements ActionListener, KeyListener {
     }
 
     private void drawBackground(Graphics g) {
-        // draw a checkered background
-        g.setColor(new Color(214, 214, 214));
         for (int row = 0; row < ROWS; row++) {
             for (int col = 0; col < COLUMNS; col++) {
                 // only color every other tile
-                if ((row + col) % 2 == 1) {
-                    // draw a square tile at the current row/column position
+                if(board[row][col]==1){
+                    g.setColor(new Color(0, 0, 0));
                     g.fillRect(
                             col * TILE_SIZE,
                             row * TILE_SIZE,
@@ -100,6 +116,17 @@ public class Board extends JPanel implements ActionListener, KeyListener {
                             TILE_SIZE
                     );
                 }
+                else if ((row + col) % 2 == 1) {
+                    // draw a square tile at the current row/column position
+                    g.setColor(new Color(214, 214, 214));
+                    g.fillRect(
+                            col * TILE_SIZE,
+                            row * TILE_SIZE,
+                            TILE_SIZE,
+                            TILE_SIZE
+                    );
+                }
+
             }
         }
     }

@@ -9,6 +9,8 @@ import java.io.File;
 import java.io.IOException;
 import javax.imageio.ImageIO;
 
+import static game.Board.board;
+
 public class Player {
 
     // image that represents the player's position on the board
@@ -31,7 +33,7 @@ public class Player {
         try {
             // you can use just the filename if the image file is in your
             // project folder, otherwise you need to provide the file path.
-            image = ImageIO.read(new File("images/player.png"));
+            image = ImageIO.read(new File("dungeonCrawler/images/player.png"));
         } catch (IOException exc) {
             System.out.println("Error opening image file: " + exc.getMessage());
         }
@@ -50,6 +52,14 @@ public class Player {
         );
     }
 
+    private void showArea(){ //TODO
+        System.out.println("my: " + pos.x + " " + pos.y);
+        System.out.println("left: " + (board[pos.x - 1][pos.y] != null ? board[pos.x - 1][pos.y] : null));
+        System.out.println("right: " + (board[pos.x + 1][pos.y] != null ? board[pos.x + 1][pos.y] : null));
+        System.out.println("up: " + (board[pos.x][pos.y - 1] != null ? board[pos.x][pos.y - 1] : null));
+        System.out.println("down: " + (board[pos.x][pos.y + 1] != null ? board[pos.x][pos.y + 1] : null));
+    }
+
     public void keyPressed(KeyEvent e) {
         // every keyboard get has a certain code. get the value of that code from the
         // keyboard event so that we can compare it to KeyEvent constants
@@ -58,16 +68,31 @@ public class Player {
         // depending on which arrow key was pressed, we're going to move the player by
         // one whole tile for this input
         if (key == KeyEvent.VK_UP) {
-            pos.translate(0, -1);
+
+            if (board[pos.x][pos.y - 1] == 0){
+                pos.translate(0, -1);
+            }
+            showArea();
+
         }
         if (key == KeyEvent.VK_RIGHT) {
-            pos.translate(1, 0);
+            System.out.println(pos.x + " " + pos.y);
+            if (board[pos.x + 1][pos.y] == 0){
+                pos.translate(1, 0);
+            }
+            showArea();
         }
         if (key == KeyEvent.VK_DOWN) {
-            pos.translate(0, 1);
+            if (board[pos.x][pos.y + 1] == 0){
+                pos.translate(0, +1);
+            }
+            showArea();
         }
         if (key == KeyEvent.VK_LEFT) {
-            pos.translate(-1, 0);
+            if (board[pos.x - 1][pos.y] == 0){
+                pos.translate(-1, 0);
+            }
+            showArea();
         }
     }
 
@@ -89,13 +114,7 @@ public class Player {
         }
     }
 
-    public String getScore() {
-        return String.valueOf(score);
-    }
 
-    public void addScore(int amount) {
-        score += amount;
-    }
 
     public Point getPos() {
         return pos;
