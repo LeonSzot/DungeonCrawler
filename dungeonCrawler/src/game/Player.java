@@ -7,9 +7,10 @@ import java.awt.image.ImageObserver;
 import java.awt.Point;
 import java.io.File;
 import java.io.IOException;
+import java.util.Random;
 import javax.imageio.ImageIO;
 
-import static game.Board.board;
+import static game.Board.*;
 
 public class Player {
 
@@ -17,18 +18,26 @@ public class Player {
     private BufferedImage image;
     // current position of the player on the board grid
     private Point pos;
-    // keep track of the player's score
-    private int score;
 
     public Player() {
         // load the assets
         loadImage();
 
         // initialize the state
-        pos = new Point(0, 0);
-        score = 0;
+        pos = randomizePos();
     }
 
+    private Point randomizePos(){
+        Random generator = new Random();
+        int x = generator.nextInt(COLUMNS);
+        int y = generator.nextInt(ROWS);
+
+        while (board[x][y] != 0){
+            x = generator.nextInt(COLUMNS);
+            y = generator.nextInt(ROWS);
+        }
+        return new Point(x, y);
+    }
     private void loadImage() {
         try {
             // you can use just the filename if the image file is in your
@@ -52,14 +61,6 @@ public class Player {
         );
     }
 
-    private void showArea(){ //TODO
-        System.out.println("my: " + pos.x + " " + pos.y);
-        System.out.println("left: " + (board[pos.x - 1][pos.y] != null ? board[pos.x - 1][pos.y] : null));
-        System.out.println("right: " + (board[pos.x + 1][pos.y] != null ? board[pos.x + 1][pos.y] : null));
-        System.out.println("up: " + (board[pos.x][pos.y - 1] != null ? board[pos.x][pos.y - 1] : null));
-        System.out.println("down: " + (board[pos.x][pos.y + 1] != null ? board[pos.x][pos.y + 1] : null));
-    }
-
     public void keyPressed(KeyEvent e) {
         // every keyboard get has a certain code. get the value of that code from the
         // keyboard event so that we can compare it to KeyEvent constants
@@ -68,31 +69,32 @@ public class Player {
         // depending on which arrow key was pressed, we're going to move the player by
         // one whole tile for this input
         if (key == KeyEvent.VK_UP) {
-
-            if (board[pos.x][pos.y - 1] == 0){
-                pos.translate(0, -1);
+            if(pos.y > 0 ) {
+                if (board[pos.x][pos.y - 1] == 0) {
+                    pos.translate(0, -1);
+                }
             }
-            showArea();
-
         }
         if (key == KeyEvent.VK_RIGHT) {
-            System.out.println(pos.x + " " + pos.y);
-            if (board[pos.x + 1][pos.y] == 0){
-                pos.translate(1, 0);
+            if (pos.x < COLUMNS - 1) {
+                if (board[pos.x + 1][pos.y] == 0) {
+                    pos.translate(1, 0);
+                }
             }
-            showArea();
         }
         if (key == KeyEvent.VK_DOWN) {
-            if (board[pos.x][pos.y + 1] == 0){
-                pos.translate(0, +1);
+            if (pos.y < ROWS - 1) {
+                if (board[pos.x][pos.y + 1] == 0) {
+                    pos.translate(0, +1);
+                }
             }
-            showArea();
         }
         if (key == KeyEvent.VK_LEFT) {
-            if (board[pos.x - 1][pos.y] == 0){
-                pos.translate(-1, 0);
+            if(pos.x > 0) {
+                if (board[pos.x - 1][pos.y] == 0) {
+                    pos.translate(-1, 0);
+                }
             }
-            showArea();
         }
     }
 

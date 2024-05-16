@@ -12,7 +12,7 @@ public class Board extends JPanel implements ActionListener, KeyListener {
     private final int DELAY = 25;
     // controls the size of the board
     public static final int TILE_SIZE = 80;
-    public static final int ROWS = 12;
+    public static final int ROWS = 10;
     public static final int COLUMNS = 18;
     // suppress serialization warning
     private static final long serialVersionUID = 490905409104883233L;
@@ -40,17 +40,17 @@ public class Board extends JPanel implements ActionListener, KeyListener {
     }
 
     private static Integer[][] getBoard(){
-        Integer[][] board = new Integer[ROWS][COLUMNS];
+        Integer[][] board = new Integer[COLUMNS][ROWS];
         ArrayList <Integer> options = new ArrayList<>();
         options.add(0);
+        options.add(0);
+        options.add(0);
         options.add(1);
-        options.add(0);
-        options.add(0);
         Random generator = new Random();
 
         for (int i = 0; i < ROWS; i++){
             for (int j = 0; j < COLUMNS; j++){
-                board[i][j] = options.get(generator.nextInt(3));
+                board[j][i] = options.get(generator.nextInt(4));
             }
         }
 
@@ -107,7 +107,7 @@ public class Board extends JPanel implements ActionListener, KeyListener {
         for (int row = 0; row < ROWS; row++) {
             for (int col = 0; col < COLUMNS; col++) {
                 // only color every other tile
-                if(board[row][col]==1){
+                if(board[col][row]==1){
                     g.setColor(new Color(0, 0, 0));
                     g.fillRect(
                             col * TILE_SIZE,
