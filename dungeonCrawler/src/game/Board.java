@@ -11,10 +11,12 @@ public class Board extends JPanel implements ActionListener, KeyListener {
     // controls the delay between each tick in ms
     private final int DELAY = 25;
     // controls the size of the board
-    public static final int TILE_SIZE = 80;
-    public static final int ROWS = 10;
-    public static final int COLUMNS = 18;
+    public static final int TILE_SIZE = 60;
+    public static final int ROWS = 15;
+    public static final int COLUMNS = 25;
     // suppress serialization warning
+
+    public static final int ROOMS = 10;
     private static final long serialVersionUID = 490905409104883233L;
 
     // keep a reference to the timer object that triggers actionPerformed() in
@@ -22,8 +24,10 @@ public class Board extends JPanel implements ActionListener, KeyListener {
     private Timer timer;
     // objects that appear on the game board
     private Player player;
+    public ArrayList<Room> rooms;
+    public Room currentRoom;
 
-    public static Integer[][] board = getBoard();
+
 
     public Board() {
         // set the game board size
@@ -31,17 +35,125 @@ public class Board extends JPanel implements ActionListener, KeyListener {
         // set the game board background color
         setBackground(new Color(232, 232, 232));
 
+        rooms = generateRooms(ROOMS);
+        createDoors(rooms);
+        currentRoom = rooms.get(0);
+
         // initialize the game state
-        player = new Player();
+        player = new Player(currentRoom);
 
         // this timer will call the actionPerformed() method every DELAY ms
         timer = new Timer(DELAY, this);
         timer.start();
     }
 
-    private static Integer[][] getBoard(){
+    private void createDoors(ArrayList<Room> roomsTemp){
+        for (Room room : roomsTemp){
+            if (roomExists(roomsTemp, room.x - 1, room.y)){
+                room.board[0][(int) Math.floor(ROWS / 2)] = 0;
+                room.board[0][(int) Math.floor(ROWS / 2) + 1] = 0;
+                room.board[0][(int) Math.floor(ROWS / 2) - 1] = 0;
+            }
+            if (roomExists(roomsTemp, room.x + 1, room.y)){
+                room.board[COLUMNS - 1][(int) Math.floor(ROWS / 2)] = 0;
+                room.board[COLUMNS - 1][(int) Math.floor(ROWS / 2) + 1] = 0;
+                room.board[COLUMNS - 1][(int) Math.floor(ROWS / 2) - 1] = 0;
+            }
+            if (roomExists(roomsTemp, room.x, room.y + 1)){
+                room.board[(int) Math.floor(COLUMNS / 2)][ROWS - 1] = 0;
+                room.board[(int) Math.floor(COLUMNS / 2) + 1][ROWS - 1] = 0;
+                room.board[(int) Math.floor(COLUMNS / 2) - 1][ROWS - 1] = 0;
+            }
+            if (roomExists(roomsTemp, room.x, room.y - 1)){
+                room.board[(int) Math.floor(COLUMNS / 2)][0] = 0;
+                room.board[(int) Math.floor(COLUMNS / 2) + 1][0] = 0;
+                room.board[(int) Math.floor(COLUMNS / 2) - 1][0] = 0;
+            }
+        }
+    }
+
+    private Boolean roomExists(ArrayList<Room> roomsTemp, int x, int y){
+        for (Room room : roomsTemp){
+            if (x == room.x && y == room.y){
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private ArrayList<Room> generateRooms(int roomsNum){
+        ArrayList<Room> roomsTemp = new ArrayList<>();
+        int previousX = 0, previousY = 0;
+        Random generator = new Random();
+        boolean moveX;
+        boolean moveNegative;
+
+        int i = 0;
+        while (i < roomsNum){
+            if (i == 0){
+                roomsTemp.add(new Room(createRoom(), previousX, previousY));
+                i++;
+            }
+            else{
+                moveX = generator.nextBoolean();
+                moveNegative = generator.nextBoolean();
+
+                if (moveX){
+                    if (moveNegative){
+                        if (roomExists(roomsTemp, previousX - 1, previousY)){
+                            previousX -= 1;
+                        }
+                        else{
+                            roomsTemp.add(new Room(createRoom(), previousX - 1, previousY));
+                            previousX -= 1;
+                            i++;
+                        }
+                    }
+                    else{
+                        if (roomExists(roomsTemp, previousX + 1, previousY)){
+                            previousX += 1;
+                        }
+                        else{
+                            roomsTemp.add(new Room(createRoom(), previousX + 1, previousY));
+                            previousX += 1;
+                            i++;
+                        }
+                    }
+                }
+                else{
+                    if (moveNegative){
+                        if (roomExists(roomsTemp, previousX , previousY - 1)){
+                            previousY -= 1;
+                        }
+                        else{
+                            roomsTemp.add(new Room(createRoom(), previousX, previousY - 1));
+                            previousY -= 1;
+                            i++;
+                        }
+                    }
+                    else{
+                        if (roomExists(roomsTemp, previousX , previousY + 1)){
+                            previousY += 1;
+                        }
+                        else{
+                            roomsTemp.add(new Room(createRoom(), previousX, previousY + 1));
+                            previousY += 1;
+                            i++;
+                        }
+                    }
+                }
+            }
+        }
+
+        return roomsTemp;
+    }
+
+
+    private static Integer[][] createRoom(){
         Integer[][] board = new Integer[COLUMNS][ROWS];
         ArrayList <Integer> options = new ArrayList<>();
+        options.add(0);
         options.add(0);
         options.add(0);
         options.add(0);
@@ -50,7 +162,12 @@ public class Board extends JPanel implements ActionListener, KeyListener {
 
         for (int i = 0; i < ROWS; i++){
             for (int j = 0; j < COLUMNS; j++){
-                board[j][i] = options.get(generator.nextInt(4));
+                if (j == 0 || j == COLUMNS - 1 || i == 0 || i == ROWS - 1){
+                    board[j][i] = 1;
+                }
+                else {
+                    board[j][i] = options.get(generator.nextInt(5));
+                }
             }
         }
 
@@ -80,7 +197,7 @@ public class Board extends JPanel implements ActionListener, KeyListener {
         // react to imageUpdate() events triggered by g.drawImage()
 
         // draw our graphics.
-        drawBackground(g);
+        drawBackground(g, currentRoom);
         player.draw(g, this);
 
         // this smooths out animations on some systems
@@ -103,11 +220,11 @@ public class Board extends JPanel implements ActionListener, KeyListener {
         // react to key up events
     }
 
-    private void drawBackground(Graphics g) {
+    private void drawBackground(Graphics g, Room room) {
         for (int row = 0; row < ROWS; row++) {
             for (int col = 0; col < COLUMNS; col++) {
                 // only color every other tile
-                if(board[col][row]==1){
+                if(room.board[col][row]==1){
                     g.setColor(new Color(0, 0, 0));
                     g.fillRect(
                             col * TILE_SIZE,
