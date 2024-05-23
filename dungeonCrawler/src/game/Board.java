@@ -40,7 +40,7 @@ public class Board extends JPanel implements ActionListener, KeyListener {
         currentRoom = rooms.get(0);
 
         // initialize the game state
-        player = new Player(currentRoom);
+        player = new Player(this);
 
         // this timer will call the actionPerformed() method every DELAY ms
         timer = new Timer(DELAY, this);
@@ -50,24 +50,24 @@ public class Board extends JPanel implements ActionListener, KeyListener {
     private void createDoors(ArrayList<Room> roomsTemp){
         for (Room room : roomsTemp){
             if (roomExists(roomsTemp, room.x - 1, room.y)){
-                room.board[0][(int) Math.floor(ROWS / 2)] = 0;
-                room.board[0][(int) Math.floor(ROWS / 2) + 1] = 0;
-                room.board[0][(int) Math.floor(ROWS / 2) - 1] = 0;
+                room.board[0][(int) Math.floor(ROWS / 2)] = 2;
+                room.board[0][(int) Math.floor(ROWS / 2) + 1] = 2;
+                room.board[0][(int) Math.floor(ROWS / 2) - 1] = 2;
             }
             if (roomExists(roomsTemp, room.x + 1, room.y)){
-                room.board[COLUMNS - 1][(int) Math.floor(ROWS / 2)] = 0;
-                room.board[COLUMNS - 1][(int) Math.floor(ROWS / 2) + 1] = 0;
-                room.board[COLUMNS - 1][(int) Math.floor(ROWS / 2) - 1] = 0;
+                room.board[COLUMNS - 1][(int) Math.floor(ROWS / 2)] = 2;
+                room.board[COLUMNS - 1][(int) Math.floor(ROWS / 2) + 1] = 2;
+                room.board[COLUMNS - 1][(int) Math.floor(ROWS / 2) - 1] = 2;
             }
             if (roomExists(roomsTemp, room.x, room.y + 1)){
-                room.board[(int) Math.floor(COLUMNS / 2)][ROWS - 1] = 0;
-                room.board[(int) Math.floor(COLUMNS / 2) + 1][ROWS - 1] = 0;
-                room.board[(int) Math.floor(COLUMNS / 2) - 1][ROWS - 1] = 0;
+                room.board[(int) Math.floor(COLUMNS / 2)][ROWS - 1] = 2;
+                room.board[(int) Math.floor(COLUMNS / 2) + 1][ROWS - 1] = 2;
+                room.board[(int) Math.floor(COLUMNS / 2) - 1][ROWS - 1] = 2;
             }
             if (roomExists(roomsTemp, room.x, room.y - 1)){
-                room.board[(int) Math.floor(COLUMNS / 2)][0] = 0;
-                room.board[(int) Math.floor(COLUMNS / 2) + 1][0] = 0;
-                room.board[(int) Math.floor(COLUMNS / 2) - 1][0] = 0;
+                room.board[(int) Math.floor(COLUMNS / 2)][0] = 2;
+                room.board[(int) Math.floor(COLUMNS / 2) + 1][0] = 2;
+                room.board[(int) Math.floor(COLUMNS / 2) - 1][0] = 2;
             }
         }
     }
@@ -80,6 +80,16 @@ public class Board extends JPanel implements ActionListener, KeyListener {
         }
 
         return false;
+    }
+
+    public Room getRoom(int x, int y){
+        for (Room room : rooms){
+            if (x == room.x && y == room.y){
+                return room;
+            }
+        }
+
+        return null;
     }
 
     private ArrayList<Room> generateRooms(int roomsNum){
@@ -226,6 +236,14 @@ public class Board extends JPanel implements ActionListener, KeyListener {
                 // only color every other tile
                 if(room.board[col][row]==1){
                     g.setColor(new Color(0, 0, 0));
+                    g.fillRect(
+                            col * TILE_SIZE,
+                            row * TILE_SIZE,
+                            TILE_SIZE,
+                            TILE_SIZE
+                    );
+                }else if(room.board[col][row]==2){
+                    g.setColor(new Color(0, 200, 255));
                     g.fillRect(
                             col * TILE_SIZE,
                             row * TILE_SIZE,

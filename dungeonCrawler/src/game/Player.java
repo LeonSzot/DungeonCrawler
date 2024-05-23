@@ -18,13 +18,16 @@ public class Player {
     // current position of the player on the room grid
     private Point pos;
 
+    public Board board;
+
     public Room room;
 
-    public Player(Room roomIn) {
+    public Player(Board boardIn) {
         // load the assets
         loadImage();
 
-        room = roomIn;
+        board = boardIn;
+        room = board.currentRoom;
 
         // initialize the state
         pos = randomizePos();
@@ -77,30 +80,48 @@ public class Player {
         // one whole tile for this input
         if (key == KeyEvent.VK_UP) {
             if(pos.y > 0 ) {
-                if (room.board[pos.x][pos.y - 1] == 0) {
+                if (room.board[pos.x][pos.y - 1] != 1) {
                     pos.translate(0, -1);
                 }
+            }
+            else if(room.board[pos.x][pos.y] == 2 && pos.y == 0){
+                room = board.getRoom(room.x, room.y - 1);
+                board.currentRoom = room;
+                pos.y = ROWS - 1;
             }
         }
         if (key == KeyEvent.VK_RIGHT) {
             if (pos.x < COLUMNS - 1) {
-                if (room.board[pos.x + 1][pos.y] == 0) {
+                if (room.board[pos.x + 1][pos.y] != 1) {
                     pos.translate(1, 0);
                 }
+            }
+            else if(room.board[pos.x][pos.y] == 2 && pos.x == COLUMNS - 1) {
+                room = board.getRoom(room.x + 1, room.y);
+                board.currentRoom = room;
+                pos.x = 0;
             }
         }
         if (key == KeyEvent.VK_DOWN) {
             if (pos.y < ROWS - 1) {
-                if (room.board[pos.x][pos.y + 1] == 0) {
+                if (room.board[pos.x][pos.y + 1] != 1) {
                     pos.translate(0, +1);
                 }
+            }else if(room.board[pos.x][pos.y] == 2 && pos.y == ROWS - 1){
+                room = board.getRoom(room.x, room.y + 1);
+                board.currentRoom = room;
+                pos.y = 0;
             }
         }
         if (key == KeyEvent.VK_LEFT) {
             if(pos.x > 0) {
-                if (room.board[pos.x - 1][pos.y] == 0) {
+                if (room.board[pos.x - 1][pos.y] != 1) {
                     pos.translate(-1, 0);
                 }
+            }else if(room.board[pos.x][pos.y] == 2 && pos.x == 0){
+                    room = board.getRoom(room.x - 1, room.y);
+                    board.currentRoom = room;
+                    pos.x = COLUMNS - 1;
             }
         }
     }
@@ -123,10 +144,5 @@ public class Player {
         }
     }
 
-
-
-    public Point getPos() {
-        return pos;
-    }
 
 }
