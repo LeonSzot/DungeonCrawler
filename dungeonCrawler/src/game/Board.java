@@ -3,10 +3,11 @@ package game;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Random;
 import javax.swing.*;
 
-public class Board extends JPanel implements ActionListener, KeyListener {
+public class Board extends JPanel implements ActionListener, KeyListener, MouseListener{
 
     // controls the delay between each tick in ms
     private final int DELAY = 25;
@@ -50,27 +51,32 @@ public class Board extends JPanel implements ActionListener, KeyListener {
     private void createDoors(ArrayList<Room> roomsTemp){
         for (Room room : roomsTemp){
             if (roomExists(roomsTemp, room.x - 1, room.y)){
-                room.board[0][(int) Math.floor(ROWS / 2)] = 2;
-                room.board[0][(int) Math.floor(ROWS / 2) + 1] = 2;
-                room.board[0][(int) Math.floor(ROWS / 2) - 1] = 2;
+                getNode(0, (int) Math.floor(ROWS / 2), room).value = 2;
+                getNode(0, (int) Math.floor(ROWS / 2) + 1, room).value = 2;
+                getNode(0, (int) Math.floor(ROWS / 2) - 1, room).value = 2;
             }
             if (roomExists(roomsTemp, room.x + 1, room.y)){
-                room.board[COLUMNS - 1][(int) Math.floor(ROWS / 2)] = 2;
-                room.board[COLUMNS - 1][(int) Math.floor(ROWS / 2) + 1] = 2;
-                room.board[COLUMNS - 1][(int) Math.floor(ROWS / 2) - 1] = 2;
+                getNode(COLUMNS - 1, (int) Math.floor(ROWS / 2), room).value = 2;
+                getNode(COLUMNS - 1, (int) Math.floor(ROWS / 2) + 1, room).value = 2;
+                getNode(COLUMNS - 1, (int) Math.floor(ROWS / 2) - 1, room).value = 2;
             }
             if (roomExists(roomsTemp, room.x, room.y + 1)){
-                room.board[(int) Math.floor(COLUMNS / 2)][ROWS - 1] = 2;
-                room.board[(int) Math.floor(COLUMNS / 2) + 1][ROWS - 1] = 2;
-                room.board[(int) Math.floor(COLUMNS / 2) - 1][ROWS - 1] = 2;
+                getNode((int) Math.floor(COLUMNS / 2), ROWS - 1, room).value = 2;
+                getNode((int) Math.floor(COLUMNS / 2) + 1, ROWS - 1, room).value = 2;
+                getNode((int) Math.floor(COLUMNS / 2) - 1, ROWS - 1, room).value = 2;
             }
             if (roomExists(roomsTemp, room.x, room.y - 1)){
-                room.board[(int) Math.floor(COLUMNS / 2)][0] = 2;
-                room.board[(int) Math.floor(COLUMNS / 2) + 1][0] = 2;
-                room.board[(int) Math.floor(COLUMNS / 2) - 1][0] = 2;
+                getNode((int) Math.floor(COLUMNS / 2), 0, room).value = 2;
+                getNode((int) Math.floor(COLUMNS / 2) + 1, 0, room).value = 2;
+                getNode((int) Math.floor(COLUMNS / 2) - 1, 0, room).value = 2;
             }
         }
     }
+
+    public Node getNode(int x, int y, Room room){
+        return room.board[x][y];
+    }
+
 
     private Boolean roomExists(ArrayList<Room> roomsTemp, int x, int y){
         for (Room room : roomsTemp){
@@ -160,8 +166,8 @@ public class Board extends JPanel implements ActionListener, KeyListener {
     }
 
 
-    private static Integer[][] createRoom(){
-        Integer[][] board = new Integer[COLUMNS][ROWS];
+    private static Node[][] createRoom(){
+        Node[][] board = new Node[COLUMNS][ROWS];
         ArrayList <Integer> options = new ArrayList<>();
         options.add(0);
         options.add(0);
@@ -173,10 +179,10 @@ public class Board extends JPanel implements ActionListener, KeyListener {
         for (int i = 0; i < ROWS; i++){
             for (int j = 0; j < COLUMNS; j++){
                 if (j == 0 || j == COLUMNS - 1 || i == 0 || i == ROWS - 1){
-                    board[j][i] = 1;
+                    board[j][i] = new Node(j, i, 1);
                 }
                 else {
-                    board[j][i] = options.get(generator.nextInt(5));
+                    board[j][i] = new Node(j, i, options.get(generator.nextInt(5)));
                 }
             }
         }
@@ -234,7 +240,7 @@ public class Board extends JPanel implements ActionListener, KeyListener {
         for (int row = 0; row < ROWS; row++) {
             for (int col = 0; col < COLUMNS; col++) {
                 // only color every other tile
-                if(room.board[col][row]==1){
+                if(room.board[col][row].value ==1){
                     g.setColor(new Color(0, 0, 0));
                     g.fillRect(
                             col * TILE_SIZE,
@@ -242,7 +248,7 @@ public class Board extends JPanel implements ActionListener, KeyListener {
                             TILE_SIZE,
                             TILE_SIZE
                     );
-                }else if(room.board[col][row]==2){
+                }else if(room.board[col][row].value ==2){
                     g.setColor(new Color(0, 200, 255));
                     g.fillRect(
                             col * TILE_SIZE,
@@ -267,4 +273,125 @@ public class Board extends JPanel implements ActionListener, KeyListener {
     }
 
 
+    @Override
+    public void mouseClicked(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mousePressed(MouseEvent e) {
+        player.mousePressed(e);
+    }
+
+    @Override
+    public void mouseReleased(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mouseEntered(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mouseExited(MouseEvent e) {
+
+    }
+
+    private int calculateDistance(Node node1, Node node2){
+        int xDistance = Math.abs(node1.x - node2.x);
+        int yDistance = Math.abs(node1.y - node2.y);
+        int remaining = Math.abs(xDistance - yDistance);
+        return remaining;
+    }
+
+    private ArrayList<Node> getPath(Node end){
+        ArrayList<Node> path = new ArrayList<>();
+        path.add(end);
+        Node current = end;
+
+        while (current.cameFrom != null){
+            path.add(current.cameFrom);
+            current = current.cameFrom;
+        }
+
+        Collections.reverse(path);
+        return path;
+    }
+
+
+    public ArrayList<Node> pathfinder(Room room, int playerX, int playerY, int mouseX, int mouseY){
+        ArrayList<Node> open = new ArrayList<>();
+        ArrayList<Node> closed = new ArrayList<>();
+
+        // Create the start node and assign g, h, and f value
+        Node startNode = getNode(playerX, playerY, room);
+        startNode.g = 0;
+        startNode.h = calculateDistance(startNode, getNode(mouseX, mouseY, room));
+        startNode.f = startNode.g + startNode.h;
+
+        // Append start node to the open list
+        open.add(startNode);
+
+        while (!open.isEmpty()){
+            for (Node node1 : open) {
+                if (!node1.start && !node1.end) {
+                    node1.inOpen = true;
+                }
+            }
+
+            for (Node node2 : closed){
+                if (!node2.start && !node2.end){
+                    node2.inClosed = true;
+                }
+
+            }
+
+             // Get node with the lowest f score in the open list
+            Node current = open.get(0);
+            for (int i = 0; i < open.size(); i++){
+                Node node = open.get(i);
+                if (node.f < current.f){
+                    current = node;
+                }
+            }
+
+            // Remove current from open list
+            open.remove(current);
+
+            // Add current to closed
+            closed.add(current);
+
+            // Check if current is the end node
+            if (current.end){
+                return getPath(current);
+            }
+
+            // TODO
+            // convert to java
+            // Get neighbours list of the current node
+            neighbours = get_neighbours(map, current, closed);
+
+            // For each neighbour of the current node
+            for (neighbour in neighbours){
+                tentative_g = current.g + calc_dist(current, neighbour);
+                if (tentative_g < neighbour.g){
+                    neighbour.came_from = current
+                    neighbour.g = tentative_g
+                    neighbour.h = calc_dist(neighbour, map.get_end())
+                    neighbour.f = neighbour.g + neighbour.h
+
+                    if (neighbour not in open){
+                        open.append(neighbour);
+                    }
+
+                }
+
+            }
+
+
+        }
+
+        return null;
+    }
 }

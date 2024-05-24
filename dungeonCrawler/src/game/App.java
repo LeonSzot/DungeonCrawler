@@ -1,5 +1,6 @@
 package game;
 import javax.swing.*;
+import java.awt.event.MouseListener;
 
 class App {
 
@@ -16,6 +17,7 @@ class App {
         window.add(board);
         // pass keyboard inputs to the jpanel
         window.addKeyListener(board);
+        window.addMouseListener(board);
 
         // don't allow the user to resize the window
         window.setResizable(false);

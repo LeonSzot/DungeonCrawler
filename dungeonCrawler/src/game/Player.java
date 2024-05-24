@@ -2,6 +2,7 @@ package game;
 
 import java.awt.*;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.awt.image.ImageObserver;
 import java.io.File;
@@ -31,10 +32,7 @@ public class Player {
 
         // initialize the state
         pos = randomizePos();
-        
 
-        
-        
     }
 
     private Point randomizePos(){
@@ -42,7 +40,7 @@ public class Player {
         int x = generator.nextInt(COLUMNS);
         int y = generator.nextInt(ROWS);
 
-        while (room.board[x][y] != 0){
+        while (room.board[x][y].value != 0){
             x = generator.nextInt(COLUMNS);
             y = generator.nextInt(ROWS);
         }
@@ -80,11 +78,11 @@ public class Player {
         // one whole tile for this input
         if (key == KeyEvent.VK_UP) {
             if(pos.y > 0 ) {
-                if (room.board[pos.x][pos.y - 1] != 1) {
+                if (room.board[pos.x][pos.y - 1].value != 1) {
                     pos.translate(0, -1);
                 }
             }
-            else if(room.board[pos.x][pos.y] == 2 && pos.y == 0){
+            else if(room.board[pos.x][pos.y].value == 2 && pos.y == 0){
                 room = board.getRoom(room.x, room.y - 1);
                 board.currentRoom = room;
                 pos.y = ROWS - 1;
@@ -92,11 +90,11 @@ public class Player {
         }
         if (key == KeyEvent.VK_RIGHT) {
             if (pos.x < COLUMNS - 1) {
-                if (room.board[pos.x + 1][pos.y] != 1) {
+                if (room.board[pos.x + 1][pos.y].value != 1) {
                     pos.translate(1, 0);
                 }
             }
-            else if(room.board[pos.x][pos.y] == 2 && pos.x == COLUMNS - 1) {
+            else if(room.board[pos.x][pos.y].value == 2 && pos.x == COLUMNS - 1) {
                 room = board.getRoom(room.x + 1, room.y);
                 board.currentRoom = room;
                 pos.x = 0;
@@ -104,10 +102,10 @@ public class Player {
         }
         if (key == KeyEvent.VK_DOWN) {
             if (pos.y < ROWS - 1) {
-                if (room.board[pos.x][pos.y + 1] != 1) {
+                if (room.board[pos.x][pos.y + 1].value != 1) {
                     pos.translate(0, +1);
                 }
-            }else if(room.board[pos.x][pos.y] == 2 && pos.y == ROWS - 1){
+            }else if(room.board[pos.x][pos.y].value == 2 && pos.y == ROWS - 1){
                 room = board.getRoom(room.x, room.y + 1);
                 board.currentRoom = room;
                 pos.y = 0;
@@ -115,10 +113,10 @@ public class Player {
         }
         if (key == KeyEvent.VK_LEFT) {
             if(pos.x > 0) {
-                if (room.board[pos.x - 1][pos.y] != 1) {
+                if (room.board[pos.x - 1][pos.y].value != 1) {
                     pos.translate(-1, 0);
                 }
-            }else if(room.board[pos.x][pos.y] == 2 && pos.x == 0){
+            }else if(room.board[pos.x][pos.y].value == 2 && pos.x == 0){
                     room = board.getRoom(room.x - 1, room.y);
                     board.currentRoom = room;
                     pos.x = COLUMNS - 1;
@@ -145,4 +143,15 @@ public class Player {
     }
 
 
+    public void mousePressed(MouseEvent e) {
+        int mouseBtn = e.getButton();
+
+        if (mouseBtn == MouseEvent.BUTTON1){
+            int x = (int) Math.floor((e.getX() - 7) / TILE_SIZE);
+            int y = (int) Math.floor((e.getY() - 30) / TILE_SIZE);
+
+            System.out.println(x);
+            System.out.println(y);
+        }
+    }
 }
