@@ -319,37 +319,40 @@ public class Board extends JPanel implements ActionListener, KeyListener, MouseL
         return path;
     }
 
-
     public ArrayList<Node> pathfinder(Room room, int playerX, int playerY, int mouseX, int mouseY){
         ArrayList<Node> open = new ArrayList<>();
         ArrayList<Node> closed = new ArrayList<>();
 
+        // Reset g, h, and f values for all nodes
+        for (int row = 0; row < ROWS; row++) {
+            for (int col = 0; col < COLUMNS; col++) {
+                room.board[col][row].g = Integer.MAX_VALUE;
+                room.board[col][row].h = 0;
+                room.board[col][row].f = 0;
+                room.board[col][row].cameFrom = null;
+                room.board[col][row].inOpen = false;
+                room.board[col][row].inClosed = false;
+                room.board[col][row].start = false;
+                room.board[col][row].end = false;
+            }
+        }
+
         // Create the start node and assign g, h, and f value
         Node startNode = getNode(playerX, playerY, room);
+        startNode.start = true;
         startNode.g = 0;
         startNode.h = calculateDistance(startNode, getNode(mouseX, mouseY, room));
         startNode.f = startNode.g + startNode.h;
+
+        getNode(mouseX, mouseY, room).end = true;
 
         // Append start node to the open list
         open.add(startNode);
 
         while (!open.isEmpty()){
-            for (Node node1 : open) {
-                if (!node1.start && !node1.end) {
-                    node1.inOpen = true;
-                }
-            }
-
-            for (Node node2 : closed){
-                if (!node2.start && !node2.end){
-                    node2.inClosed = true;
-                }
-
-            }
-
-             // Get node with the lowest f score in the open list
+            // Get node with the lowest f score in the open list
             Node current = open.get(0);
-            for (int i = 0; i < open.size(); i++){
+            for (int i = 1; i < open.size(); i++){
                 Node node = open.get(i);
                 if (node.f < current.f){
                     current = node;
@@ -367,31 +370,44 @@ public class Board extends JPanel implements ActionListener, KeyListener, MouseL
                 return getPath(current);
             }
 
-            // TODO
-            // convert to java
             // Get neighbours list of the current node
-            neighbours = get_neighbours(map, current, closed);
+            ArrayList<Node> neighbours = getNeighbours(room, current, closed);
 
             // For each neighbour of the current node
-            for (neighbour in neighbours){
-                tentative_g = current.g + calc_dist(current, neighbour);
-                if (tentative_g < neighbour.g){
-                    neighbour.came_from = current
-                    neighbour.g = tentative_g
-                    neighbour.h = calc_dist(neighbour, map.get_end())
-                    neighbour.f = neighbour.g + neighbour.h
+            for (Node neighbour : neighbours){
+                int tentativeG = current.g + calculateDistance(current, neighbour);
+                if (tentativeG < neighbour.g){
+                    neighbour.cameFrom = current;
+                    neighbour.g = tentativeG;
+                    neighbour.h = calculateDistance(neighbour, getNode(mouseX, mouseY, room));
+                    neighbour.f = neighbour.g + neighbour.h;
 
-                    if (neighbour not in open){
-                        open.append(neighbour);
+                    if (!open.contains(neighbour)){
+                        open.add(neighbour);
                     }
-
                 }
-
             }
-
-
         }
 
-        return null;
+        return null; // No path found
+    }
+
+    private ArrayList<Node> getNeighbours(Room room, Node node, ArrayList<Node> closed){
+        ArrayList<Node> neighbours = new ArrayList<>();
+
+        int[][] directions = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}}; // Only orthogonal moves
+
+        for (int[] dir : directions){
+            int row = node.x + dir[0];
+            int col = node.y + dir[1];
+            if ((0 <= row && row < COLUMNS) && (0 <= col && col < ROWS)){
+                Node neighbour = getNode(row, col, room);
+                if (!closed.contains(neighbour) && (neighbour.value == 0 || neighbour.value == 2)){
+                    neighbours.add(neighbour);
+                }
+            }
+        }
+
+        return neighbours;
     }
 }
